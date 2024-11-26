@@ -1,0 +1,295 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Existing head content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Ranking Page</title>
+    <style>
+        /* Existing CSS styles */
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .box-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .box {
+            width: 250px;
+            background-color: #ffffff;
+            border: 2px solid black;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 10px;
+            color: rgb(0, 0, 0);
+            font-size: 1em;
+            text-align: left;
+        }
+        .slider-container {
+            width: 250px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .rank-slider {
+            width: 100%;
+        }
+        .rank-text {
+            margin-top: 5px;
+            font-size: 1em;
+            color: #000;
+        }
+        .submit-button-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #button1 {
+            display: inline-block;
+            width: 130px;
+            height: 35px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .completion-message {
+            display: none;
+            text-align: center;
+            font-size: 1.5em;
+            color: #6e6e6e;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="ranking-container">
+        <div class="box-container">
+            <!-- Attributes Container -->
+            <div class="box" id="attribute-container">
+                <!-- Dynamic product attributes will be displayed here -->
+            </div>
+            <!-- Slider Container -->
+            <div class="slider-container">
+                <input type="range" min="1" max="10" value="5" class="rank-slider" oninput="this.nextElementSibling.innerText = 'Rank: ' + this.value">
+                <div class="rank-text">Rank: 5</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="submit-button-container">
+        <button id="button1" onclick="submitRanking()">Submit Ranking</button>
+    </div>
+
+    <div class="completion-message" id="completion-message">
+        Survey Complete, thank you for your participation. Please exit this page.
+    </div>
+
+    <script>
+        let sessionId = null; // To store the session ID
+
+        //JAVI CHANGE <FLASK_BACKEND_URL> to the URL of the backend
+        function startSession() {
+            fetch('<FLASK_BACKEND_URL>/get_session')
+                .then(response => response.json())
+                .then(data => {
+                    sessionId = data.sessionId;
+                    console.log('Received sessionId from server:', sessionId);
+                    localStorage.setItem('sessionId', sessionId);
+                    //loadProduct();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // Function to start a new session
+        /*
+        function startSession() {
+            fetch('http://localhost:3000/start-session')
+                .then(response => response.json())
+                .then(data => {
+                    sessionId = data.sessionId;
+                    console.log('Received sessionId from server:', sessionId);
+                    localStorage.setItem('sessionId', sessionId);
+                    loadProduct();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+        */
+        
+        //JAVI APP.PY DOESNT HAVE LOAD_PRODUCT FUNCTION OR GET_PRODUCT FUNCTION DO WE NEED???
+        /*
+        // Function to load a product's attributes
+        function loadProduct() {
+            console.log('Using sessionId:', sessionId);
+            fetch(`http://localhost:3000/get-product?sessionId=${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'Session completed') {
+                        showCompletionMessage();
+                        return;
+                    }
+
+                    const container = document.getElementById('attribute-container');
+                    container.innerHTML = '';
+
+                    // Display each attribute
+                    for (const [key, value] of Object.entries(data)) {
+                        const attributeDiv = document.createElement('div');
+                        attributeDiv.textContent = `${key}: ${value}`;
+                        container.appendChild(attributeDiv);
+                    }
+
+                    // Reset slider to default value
+                    const slider = document.querySelector('.rank-slider');
+                    slider.value = 5;
+                    slider.nextElementSibling.innerText = 'Rank: 5';
+
+                    // Re-enable the submit button
+                    document.getElementById('button1').disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+        */
+
+        function submitRanking() {
+            const slider = document.querySelector('.rank-slider');
+            const score = slider.value;
+        
+            const rankingData = {
+                sessionId: sessionId,
+                score: score
+            };
+        
+            // Disable the submit button to prevent multiple clicks
+            document.getElementById('button1').disabled = true;
+            
+            //JAVI CHANGE <FLASK_BACKEND_URL> to the URL of the backend
+            // Send the ranking to the backend
+            fetch('<FLASK_BACKEND_URL>/session_complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rankingData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+        
+                    if (data.message === 'Session completed') {
+                        showCompletionMessage();
+                    } else {
+                        // Handle logic if rankings are not fully complete
+                        console.log('Ranking submitted but session is not yet complete.');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    // Re-enable the submit button in case of an error
+                    document.getElementById('button1').disabled = false;
+                });
+        }
+
+        /*
+        // Function to submit ranking
+        function submitRanking() {
+            const slider = document.querySelector('.rank-slider');
+            const score = slider.value;
+
+            const rankingData = {
+                sessionId: sessionId,
+                score: score
+            };
+
+            // Disable the submit button to prevent multiple clicks
+            document.getElementById('button1').disabled = true;
+
+            // Send the ranking to the backend
+            fetch('http://localhost:3000/save-ranking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rankingData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+
+                if (data.message === 'Session completed') {
+                    showCompletionMessage(); // Show the completion message
+                } else {
+                    loadProduct();  // Load the next product after submitting the ranking
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                // Re-enable the submit button in case of an error
+                document.getElementById('button1').disabled = false;
+            });
+        }
+        */
+
+        // Function to show the completion message and hide ranking elements
+        function showCompletionMessage() {
+            document.getElementById('ranking-container').style.display = 'none';
+            document.getElementById('button1').style.display = 'none';
+            document.getElementById('completion-message').style.display = 'block';
+
+            // Clear sessionId from localStorage
+            localStorage.removeItem('sessionId');
+        }
+
+         //JAVI CHANGE <FLASK_BACKEND_URL> to the URL of the backend
+        function completeSession() {
+            if (sessionId) {
+                navigator.sendBeacon('<FLASK_BACKEND_URL>/session_complete', JSON.stringify({ sessionId: sessionId }));
+                localStorage.removeItem('sessionId');
+            }
+        }
+        
+        
+        /*
+        // Function to mark session as completed when the user leaves
+        function completeSession() {
+            if (sessionId) {
+                navigator.sendBeacon('http://localhost:3000/complete-session', JSON.stringify({ sessionId: sessionId }));
+                // Clear sessionId from localStorage
+                localStorage.removeItem('sessionId');
+            }
+        }
+        */
+        // Add event listener for page unload
+        window.addEventListener('unload', completeSession);
+
+        // Load the product when the page loads
+        window.onload = function() {
+            sessionId = localStorage.getItem('sessionId');
+            if (!sessionId) {
+                startSession();
+            } else {
+                console.log('Resuming session with sessionId:', sessionId);
+                // No need to call loadProduct() here
+            }
+        };
+    </script>
+</body>
+</html>
