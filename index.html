@@ -89,9 +89,9 @@
 </head>
 <body>
     <div class="container1">
-        <h1>Product Rating Survey</h1>
+        <h1>Product Ranking Survey</h1>
         <p>This is a study to find out your preference for the attributes of a cellphone.<br>
-            Using the slider below the attributes please rate the phone with 10 being the highest preference and 1 being the lowest. <br>
+            Using the slider below the attributes please rate the phone with 10 being the highest preference and 0 being the lowest. <br>
             Shown below are the attributes.
         </p>
     </div>
@@ -122,7 +122,7 @@
 
         //JAVI CHANGE <FLASK_BACKEND_URL> to the URL of the backend
         function startSession() {
-            fetch('<FLASK_BACKEND_URL>/get_session')
+            fetch('https://super-clean-repo-179616474930.us-east1.run.app/get_session')
                 .then(response => response.json())
                 .then(data => {
                     sessionId = data.sessionId;
@@ -203,7 +203,7 @@
             
             //JAVI CHANGE <FLASK_BACKEND_URL> to the URL of the backend
             // Send the ranking to the backend
-            fetch('<FLASK_BACKEND_URL>/session_complete', {
+            fetch('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -281,7 +281,7 @@
          //JAVI CHANGE <FLASK_BACKEND_URL> to the URL of the backend
         function completeSession() {
             if (sessionId) {
-                navigator.sendBeacon('<FLASK_BACKEND_URL>/session_complete', JSON.stringify({ sessionId: sessionId }));
+                navigator.sendBeacon('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', JSON.stringify({ sessionId: sessionId }));
                 localStorage.removeItem('sessionId');
             }
         }
