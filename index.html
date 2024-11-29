@@ -1,13 +1,10 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Existing head content -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Ranking Page</title>
     <style>
-        /* Existing CSS styles */
         body {
             display: flex;
             flex-direction: column;
@@ -72,7 +69,6 @@
             color: #6e6e6e;
             margin-top: 20px;
         }
-
         .container1 {
             display: flex;
             flex-direction: column;
@@ -83,61 +79,50 @@
             flex-wrap: wrap;
             width: 40%;
             padding-bottom: 20px;
-
         }
     </style>
 </head>
 <body>
     <div class="container1">
-        <h1>Product Rating Survey</h1>
+        <h1>Product Ranking Survey</h1>
         <p>This is a study to find out your preference for the attributes of a cellphone.<br>
-            Using the slider below the attributes please rate the phone with 10 being the highest preference and 0 being the lowest. <br>
+            Using the slider below the attributes please rate the phone with 10 being the highest preference and 0 being the lowest.<br>
             Shown below are the attributes.
         </p>
     </div>
     <div class="container" id="ranking-container">
         <div class="box-container">
-            <!-- Attributes Container -->
             <div class="box" id="attribute-container">
                 <!-- Dynamic product attributes will be displayed here -->
             </div>
-            <!-- Slider Container -->
             <div class="slider-container">
                 <input type="range" min="1" max="10" value="5" class="rank-slider" oninput="this.nextElementSibling.innerText = 'Rank: ' + this.value">
                 <div class="rank-text">Rank: 5</div>
             </div>
         </div>
     </div>
-
     <div class="submit-button-container">
         <button id="button1" onclick="submitRanking()">Submit Ranking</button>
     </div>
-
     <div class="completion-message" id="completion-message">
         Survey Complete, thank you for your participation. Please exit this page.
     </div>
-
     <script>
-        let sessionId = null; // To store the session ID
+        let sessionId = null;
 
-        //JAVI CHANGE <FLASK_BACKEND_URL> to the URL of the backend
+        // Function to fetch a new session
         function startSession() {
             fetch('https://super-clean-repo-179616474930.us-east1.run.app/get_session')
-                .then(response => {
-                    console.log('Raw response:', response); // Debug raw response
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Parsed data:', data); // Debug parsed JSON data
+                    console.log('Fetched data:', data); // Debugging logs
                     sessionId = data.session_id;
                     console.log('Session ID:', sessionId);
                     localStorage.setItem('sessionId', sessionId);
-        
-                    // Populate the UI with data
+
+                    // Populate the UI with the attributes of the first individual
                     const container = document.getElementById('attribute-container');
-                    container.innerHTML = ''; // Clear any existing content
-        
-                    // Iterate over the first individual's attributes
+                    container.innerHTML = '';
                     const firstIndividual = data.individuals[0];
                     for (const [key, value] of Object.entries(firstIndividual)) {
                         const attributeDiv = document.createElement('div');
@@ -150,141 +135,45 @@
                 });
         }
 
-
-        // Function to start a new session
-        /*
-        function startSession() {
-            fetch('http://localhost:3000/start-session')
-                .then(response => response.json())
-                .then(data => {
-                    sessionId = data.sessionId;
-                    console.log('Received sessionId from server:', sessionId);
-                    localStorage.setItem('sessionId', sessionId);
-                    loadProduct();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
-        */
-        
-        //JAVI APP.PY DOESNT HAVE LOAD_PRODUCT FUNCTION OR GET_PRODUCT FUNCTION DO WE NEED???
-        /*
-        // Function to load a product's attributes
-        function loadProduct() {
-            console.log('Using sessionId:', sessionId);
-            fetch(`http://localhost:3000/get-product?sessionId=${sessionId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message === 'Session completed') {
-                        showCompletionMessage();
-                        return;
-                    }
-
-                    const container = document.getElementById('attribute-container');
-                    container.innerHTML = '';
-
-                    // Display each attribute
-                    for (const [key, value] of Object.entries(data)) {
-                        const attributeDiv = document.createElement('div');
-                        attributeDiv.textContent = `${key}: ${value}`;
-                        container.appendChild(attributeDiv);
-                    }
-
-                    // Reset slider to default value
-                    const slider = document.querySelector('.rank-slider');
-                    slider.value = 5;
-                    slider.nextElementSibling.innerText = 'Rank: 5';
-
-                    // Re-enable the submit button
-                    document.getElementById('button1').disabled = false;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
-        */
-
+        // Function to submit the ranking
         function submitRanking() {
             const slider = document.querySelector('.rank-slider');
             const score = slider.value;
-        
+
             const rankingData = {
-                sessionId: sessionId,
+                session_id: sessionId, // Fixed: Use session_id to match the backend
                 score: score
             };
-        
-            // Disable the submit button to prevent multiple clicks
+
+            console.log('Submitting ranking data:', rankingData); // Debugging logs
+
+            // Disable the button to prevent multiple clicks
             document.getElementById('button1').disabled = true;
-            
-            //JAVI CHANGE <FLASK_BACKEND_URL> to the URL of the backend
-            // Send the ranking to the backend
+
             fetch('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(rankingData)
             })
                 .then(response => response.json())
                 .then(data => {
                     alert(data.message);
-        
+
                     if (data.message === 'Session completed') {
                         showCompletionMessage();
                     } else {
-                        // Handle logic if rankings are not fully complete
-                        console.log('Ranking submitted but session is not yet complete.');
+                        console.log('Ranking submitted. Waiting for more sessions.');
                     }
                 })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    // Re-enable the submit button in case of an error
-                    document.getElementById('button1').disabled = false;
+                .catch(error => {
+                    console.error('Error submitting ranking:', error);
+                })
+                .finally(() => {
+                    document.getElementById('button1').disabled = false; // Re-enable button in all cases
                 });
         }
 
-        /*
-        // Function to submit ranking
-        function submitRanking() {
-            const slider = document.querySelector('.rank-slider');
-            const score = slider.value;
-
-            const rankingData = {
-                sessionId: sessionId,
-                score: score
-            };
-
-            // Disable the submit button to prevent multiple clicks
-            document.getElementById('button1').disabled = true;
-
-            // Send the ranking to the backend
-            fetch('http://localhost:3000/save-ranking', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(rankingData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-
-                if (data.message === 'Session completed') {
-                    showCompletionMessage(); // Show the completion message
-                } else {
-                    loadProduct();  // Load the next product after submitting the ranking
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                // Re-enable the submit button in case of an error
-                document.getElementById('button1').disabled = false;
-            });
-        }
-        */
-
-        // Function to show the completion message and hide ranking elements
+        // Function to show the completion message
         function showCompletionMessage() {
             document.getElementById('ranking-container').style.display = 'none';
             document.getElementById('button1').style.display = 'none';
@@ -294,38 +183,33 @@
             localStorage.removeItem('sessionId');
         }
 
-         //JAVI CHANGE <FLASK_BACKEND_URL> to the URL of the backend
+        // Function to mark session as completed on page unload
         function completeSession() {
             if (sessionId) {
-                navigator.sendBeacon('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', JSON.stringify({ sessionId: sessionId }));
+                navigator.sendBeacon('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', JSON.stringify({ session_id: sessionId }));
                 localStorage.removeItem('sessionId');
             }
         }
-        
-        
-        /*
-        // Function to mark session as completed when the user leaves
-        function completeSession() {
-            if (sessionId) {
-                navigator.sendBeacon('http://localhost:3000/complete-session', JSON.stringify({ sessionId: sessionId }));
-                // Clear sessionId from localStorage
-                localStorage.removeItem('sessionId');
-            }
-        }
-        */
-        // Add event listener for page unload
+
+        // Event listener for page unload
         window.addEventListener('unload', completeSession);
 
-        // Load the product when the page loads
-        window.onload = function() {
+        // Load a new session when the page loads
+        window.onload = function () {
             sessionId = localStorage.getItem('sessionId');
             if (!sessionId) {
                 startSession();
             } else {
                 console.log('Resuming session with sessionId:', sessionId);
-                // No need to call loadProduct() here
             }
         };
+
+        /*
+        // Placeholder for potential future functions
+        function loadProduct() {
+            // Logic for loading additional products
+        }
+        */
     </script>
 </body>
 </html>
