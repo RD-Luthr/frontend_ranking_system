@@ -120,7 +120,7 @@
         let sessionId = null;
 
         function startSession() {
-            fetch('https://your-backend-url/get_session')
+            fetch('https://super-clean-repo-179616474930.us-east1.run.app/get_session')
                 .then(response => response.json())
                 .then(data => {
                     sessionId = data.session_id;
@@ -133,7 +133,7 @@
         }
 
         function loadProduct() {
-            fetch(`https://your-backend-url/get_product?sessionId=${sessionId}`)
+            fetch(`https://super-clean-repo-179616474930.us-east1.run.app/get_product?sessionId=${sessionId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.message === 'Session completed') {
@@ -171,7 +171,7 @@
 
             document.getElementById('button1').disabled = true;
 
-            fetch('https://your-backend-url/session_complete', {
+            fetch('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(rankingData)
@@ -198,7 +198,7 @@
 
         function completeSession() {
             if (sessionId) {
-                navigator.sendBeacon('https://your-backend-url/session_complete', JSON.stringify({ session_id: sessionId }));
+                navigator.sendBeacon('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', JSON.stringify({ session_id: sessionId }));
                 localStorage.removeItem('sessionId');
             }
         }
