@@ -1,10 +1,13 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Existing head content -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Ranking Page</title>
+    <title>Product Ranking Survey</title>
     <style>
+        /* Existing CSS styles */
         body {
             display: flex;
             flex-direction: column;
@@ -69,6 +72,7 @@
             color: #6e6e6e;
             margin-top: 20px;
         }
+
         .container1 {
             display: flex;
             flex-direction: column;
@@ -86,69 +90,90 @@
     <div class="container1">
         <h1>Product Ranking Survey</h1>
         <p>This is a study to find out your preference for the attributes of a cellphone.<br>
-            Using the slider below the attributes please rate the phone with 10 being the highest preference and 0 being the lowest.<br>
+            Using the slider below the attributes please rate the phone with 10 being the highest preference and 0 being the lowest. <br>
             Shown below are the attributes.
         </p>
     </div>
     <div class="container" id="ranking-container">
         <div class="box-container">
+            <!-- Attributes Container -->
             <div class="box" id="attribute-container">
                 <!-- Dynamic product attributes will be displayed here -->
             </div>
+            <!-- Slider Container -->
             <div class="slider-container">
                 <input type="range" min="1" max="10" value="5" class="rank-slider" oninput="this.nextElementSibling.innerText = 'Rank: ' + this.value">
                 <div class="rank-text">Rank: 5</div>
             </div>
         </div>
     </div>
+
     <div class="submit-button-container">
         <button id="button1" onclick="submitRanking()">Submit Ranking</button>
     </div>
+
     <div class="completion-message" id="completion-message">
         Survey Complete, thank you for your participation. Please exit this page.
     </div>
-    <script>
-        let sessionId = null;
 
-        // Function to fetch a new session
+    <script>
+        let sessionId = null; // To store the session ID
+        let currentProductIndex = 0; // To track the current product being displayed
+        let individuals = []; // To store the list of individuals from the backend
+
         function startSession() {
             fetch('https://super-clean-repo-179616474930.us-east1.run.app/get_session')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Fetched data:', data); // Debugging logs
+                    console.log('Fetched data:', data);
                     sessionId = data.session_id;
-                    console.log('Session ID:', sessionId);
+                    individuals = data.individuals;
+                    currentProductIndex = 0; // Start with the first product
                     localStorage.setItem('sessionId', sessionId);
 
-                    // Populate the UI with the attributes of the first individual
-                    const container = document.getElementById('attribute-container');
-                    container.innerHTML = '';
-                    const firstIndividual = data.individuals[0];
-                    for (const [key, value] of Object.entries(firstIndividual)) {
-                        const attributeDiv = document.createElement('div');
-                        attributeDiv.textContent = `${key}: ${value}`;
-                        container.appendChild(attributeDiv);
-                    }
+                    // Display the first product
+                    displayProduct();
                 })
-                .catch(error => {
-                    console.error('Error fetching session data:', error);
-                });
+                .catch(error => console.error('Error fetching session data:', error));
         }
 
-        // Function to submit the ranking
+        function displayProduct() {
+            const container = document.getElementById('attribute-container');
+            container.innerHTML = ''; // Clear existing attributes
+
+            // Check if we've ranked all products
+            if (currentProductIndex >= individuals.length) {
+                showCompletionMessage();
+                return;
+            }
+
+            // Get the current product and display its attributes
+            const product = individuals[currentProductIndex];
+            for (const [key, value] of Object.entries(product)) {
+                const attributeDiv = document.createElement('div');
+                attributeDiv.textContent = `${key}: ${value}`;
+                container.appendChild(attributeDiv);
+            }
+
+            // Reset slider to default value
+            const slider = document.querySelector('.rank-slider');
+            slider.value = 5;
+            slider.nextElementSibling.innerText = 'Rank: 5';
+
+            // Re-enable the submit button
+            document.getElementById('button1').disabled = false;
+        }
+
         function submitRanking() {
             const slider = document.querySelector('.rank-slider');
             const score = slider.value;
 
             const rankingData = {
-                session_id: sessionId, // Fixed: Use session_id to match the backend
+                session_id: sessionId,
                 score: score
             };
 
-            console.log('Submitting ranking data:', rankingData); // Debugging logs
-
-            // Disable the button to prevent multiple clicks
-            document.getElementById('button1').disabled = true;
+            console.log('Submitting ranking data:', rankingData);
 
             fetch('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', {
                 method: 'POST',
@@ -157,23 +182,15 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    alert(data.message);
+                    console.log('Ranking submitted:', data);
 
-                    if (data.message === 'Session completed') {
-                        showCompletionMessage();
-                    } else {
-                        console.log('Ranking submitted. Waiting for more sessions.');
-                    }
+                    // Move to the next product
+                    currentProductIndex++;
+                    displayProduct();
                 })
-                .catch(error => {
-                    console.error('Error submitting ranking:', error);
-                })
-                .finally(() => {
-                    document.getElementById('button1').disabled = false; // Re-enable button in all cases
-                });
+                .catch(error => console.error('Error submitting ranking:', error));
         }
 
-        // Function to show the completion message
         function showCompletionMessage() {
             document.getElementById('ranking-container').style.display = 'none';
             document.getElementById('button1').style.display = 'none';
@@ -183,33 +200,17 @@
             localStorage.removeItem('sessionId');
         }
 
-        // Function to mark session as completed on page unload
-        function completeSession() {
-            if (sessionId) {
-                navigator.sendBeacon('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', JSON.stringify({ session_id: sessionId }));
-                localStorage.removeItem('sessionId');
-            }
-        }
-
-        // Event listener for page unload
-        window.addEventListener('unload', completeSession);
-
-        // Load a new session when the page loads
+        // Load the session when the page loads
         window.onload = function () {
             sessionId = localStorage.getItem('sessionId');
             if (!sessionId) {
                 startSession();
             } else {
                 console.log('Resuming session with sessionId:', sessionId);
+                // Reload the individuals array (optional: fetch session data again if needed)
+                startSession(); // Or fetch existing session data from the backend
             }
         };
-
-        /*
-        // Placeholder for potential future functions
-        function loadProduct() {
-            // Logic for loading additional products
-        }
-        */
     </script>
 </body>
 </html>
