@@ -116,116 +116,101 @@
         Survey Complete, thank you for your participation. Please exit this page.
     </div>
 
-    <script>
-        let sessionId = null; // To store the session ID
-        let currentProductIndex = 0; // To track the current product being displayed
-        let individuals = []; // To store the list of individuals from the backend
+<script>
+        let sessionId = null;
 
         function startSession() {
-            fetch('https://super-clean-repo-179616474930.us-east1.run.app/get_session')
+            fetch('https://your-backend-url/get_session')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Fetched data:', data);
                     sessionId = data.session_id;
-                    individuals = data.individuals;
-                    currentProductIndex = 0; // Start with the first product
                     localStorage.setItem('sessionId', sessionId);
-
-                    // Display the first product
-                    displayProduct();
+                    loadProduct();
                 })
-                .catch(error => console.error('Error fetching session data:', error));
+                .catch(error => {
+                    console.error('Error starting session:', error);
+                });
         }
 
-        function displayProduct() {
-            const container = document.getElementById('attribute-container');
-            container.innerHTML = ''; // Clear existing attributes
+        function loadProduct() {
+            fetch(`https://your-backend-url/get_product?sessionId=${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'Session completed') {
+                        showCompletionMessage();
+                        return;
+                    }
 
-            // Check if we've ranked all products
-            if (currentProductIndex >= individuals.length) {
-                showCompletionMessage();
-                return;
-            }
+                    const container = document.getElementById('attribute-container');
+                    container.innerHTML = '';
 
-            // Get the current product and display its attributes
-            const product = individuals[currentProductIndex];
-            for (const [key, value] of Object.entries(product)) {
-                const attributeDiv = document.createElement('div');
-                attributeDiv.textContent = `${key}: ${value}`;
-                container.appendChild(attributeDiv);
-            }
+                    for (const [key, value] of Object.entries(data)) {
+                        const attributeDiv = document.createElement('div');
+                        attributeDiv.textContent = `${key}: ${value}`;
+                        container.appendChild(attributeDiv);
+                    }
 
-            // Reset slider to default value
-            const slider = document.querySelector('.rank-slider');
-            slider.value = 5;
-            slider.nextElementSibling.innerText = 'Rank: 5';
-
-            // Re-enable the submit button
-            document.getElementById('button1').disabled = false;
+                    const slider = document.querySelector('.rank-slider');
+                    slider.value = 5;
+                    slider.nextElementSibling.innerText = 'Rank: 5';
+                    document.getElementById('button1').disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error loading product:', error);
+                });
         }
 
         function submitRanking() {
             const slider = document.querySelector('.rank-slider');
             const score = slider.value;
-        
+
             const rankingData = {
                 session_id: sessionId,
                 score: score
             };
-        
-            // Disable the submit button to prevent multiple clicks
+
             document.getElementById('button1').disabled = true;
-        
-            fetch('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', {
+
+            fetch('https://your-backend-url/session_complete', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(rankingData)
             })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json(); // Expect JSON from the backend
-                    } else {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                })
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Response from backend:', data); // Debug response
-                    alert(data.message);
-        
-                    if (data.message === 'Session completed') {
-                        showCompletionMessage();
+                    if (data.message === 'Session data saved successfully') {
+                        loadProduct();
                     } else {
-                        console.log('Ranking submitted successfully.');
+                        console.error('Unexpected response:', data);
                     }
                 })
-                .catch((error) => {
+                .catch(error => {
                     console.error('Error submitting ranking:', error);
-                    // Re-enable the submit button in case of an error
-                    document.getElementById('button1').disabled = false;
                 });
         }
-
 
         function showCompletionMessage() {
             document.getElementById('ranking-container').style.display = 'none';
             document.getElementById('button1').style.display = 'none';
             document.getElementById('completion-message').style.display = 'block';
-
-            // Clear sessionId from localStorage
             localStorage.removeItem('sessionId');
         }
 
-        // Load the session when the page loads
-        window.onload = function () {
+        function completeSession() {
+            if (sessionId) {
+                navigator.sendBeacon('https://your-backend-url/session_complete', JSON.stringify({ session_id: sessionId }));
+                localStorage.removeItem('sessionId');
+            }
+        }
+
+        window.addEventListener('unload', completeSession);
+
+        window.onload = function() {
             sessionId = localStorage.getItem('sessionId');
             if (!sessionId) {
                 startSession();
             } else {
-                console.log('Resuming session with sessionId:', sessionId);
-                // Reload the individuals array (optional: fetch session data again if needed)
-                startSession(); // Or fetch existing session data from the backend
+                loadProduct();
             }
         };
     </script>
