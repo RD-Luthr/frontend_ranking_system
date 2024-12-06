@@ -118,92 +118,66 @@
 
     <script>
         let sessionId = null; // To store the session ID
-        let currentProductIndex = 0; // To track the current product being displayed
-        let individuals = []; // To store the list of individuals from the backend
+        let currentIndex = 0; // To track the current product being displayed
+        let products = []; // To store the list of individuals from the backend
 
         function startSession() {
             fetch('https://super-clean-repo-179616474930.us-east1.run.app/get_session')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Fetched data:', data);
+                    console.log('Parsed data:', data);
                     sessionId = data.session_id;
-                    individuals = data.individuals;
-                    currentProductIndex = 0; // Start with the first product
+                    products = data.individuals; // Save the products to be ranked
                     localStorage.setItem('sessionId', sessionId);
-
-                    // Display the first product
-                    displayProduct();
+        
+                    // Load the first product
+                    loadProduct();
                 })
-                .catch(error => console.error('Error fetching session data:', error));
-        }
-
-        function displayProduct() {
-            const container = document.getElementById('attribute-container');
-            container.innerHTML = ''; // Clear existing attributes
-
-            // Check if we've ranked all products
-            if (currentProductIndex >= individuals.length) {
-                showCompletionMessage();
-                return;
-            }
-
-            // Get the current product and display its attributes
-            const product = individuals[currentProductIndex];
-            for (const [key, value] of Object.entries(product)) {
-                const attributeDiv = document.createElement('div');
-                attributeDiv.textContent = `${key}: ${value}`;
-                container.appendChild(attributeDiv);
-            }
-
-            // Reset slider to default value
-            const slider = document.querySelector('.rank-slider');
-            slider.value = 5;
-            slider.nextElementSibling.innerText = 'Rank: 5';
-
-            // Re-enable the submit button
-            document.getElementById('button1').disabled = false;
+                .catch(error => {
+                    console.error('Error fetching session data:', error);
+                });
         }
 
         function submitRanking() {
             const slider = document.querySelector('.rank-slider');
             const score = slider.value;
         
+            // Update the ranking for the current product
             const rankingData = {
                 session_id: sessionId,
-                score: score
+                product_index: currentIndex + 1,
+                score: score,
             };
+        
+            console.log('Submitting ranking data:', rankingData);
         
             // Disable the submit button to prevent multiple clicks
             document.getElementById('button1').disabled = true;
         
+            currentIndex++; // Move to the next product
+            loadProduct(); // Load the next product
+        }
+        
+        function submitFinalRanking() {
+            const finalData = {
+                session_id: sessionId,
+                message: 'All products ranked',
+            };
+        
             fetch('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(rankingData)
+                body: JSON.stringify(finalData),
             })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json(); // Expect JSON from the backend
-                    } else {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                })
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Response from backend:', data); // Debug response
-                    alert(data.message);
-        
-                    if (data.message === 'Session completed') {
-                        showCompletionMessage();
-                    } else {
-                        console.log('Ranking submitted successfully.');
-                    }
+                    console.log(data.message);
+                    showCompletionMessage();
                 })
                 .catch((error) => {
-                    console.error('Error submitting ranking:', error);
-                    // Re-enable the submit button in case of an error
-                    document.getElementById('button1').disabled = false;
+                    console.error('Error submitting final ranking:', error);
                 });
         }
 
