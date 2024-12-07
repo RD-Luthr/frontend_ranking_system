@@ -123,7 +123,7 @@
     
         // Function to start a new session
         function startSession() {
-            fetch('https://super-clean-repo-179616474930.us-east1.run.app/get_session')
+            fetch('https://javicz2.pythonanywhere.com/get_session')
                 .then(response => response.json())
                 .then(data => {
                     console.log('Fetched session data:', data);
@@ -184,43 +184,43 @@
             document.getElementById('button1').disabled = true;
     
             // Send the ranking data to the backend
-            fetch('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(rankingData)
-            })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                })
-                .then(data => {
-                    console.log('Backend response:', data);
+            // fetch('https://javicz2.pythonanywhere.com/session_complete', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify(rankingData)
+            // })
+                // .then(response => {
+                //     if (response.ok) {
+                //         return response.json();
+                //     } else {
+                //         throw new Error(`HTTP error! status: ${response.status}`);
+                //     }
+                // })
+                // .then(data => {
+                //     console.log('Backend response:', data);
     
-                    if (data.message === 'Session data saved successfully') {
-                        console.log('Ranking submitted successfully for product index:', currentProductIndex + 1);
-                        currentProductIndex++; // Move to the next product
-                        displayProduct(); // Display the next product
-                    } else {
-                        console.error('Unexpected response from backend:', data);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error submitting ranking:', error);
-                    // Re-enable the submit button in case of an error
-                    document.getElementById('button1').disabled = false;
-                });
+                //     if (data.message === 'Session data saved successfully') {
+                //         console.log('Ranking submitted successfully for product index:', currentProductIndex + 1);
+                //         currentProductIndex++; // Move to the next product
+                //         displayProduct(); // Display the next product
+                //     } else {
+                //         console.error('Unexpected response from backend:', data);
+                //     }
+                // })
+                // .catch(error => {
+                //     console.error('Error submitting ranking:', error);
+                //     // Re-enable the submit button in case of an error
+                //     document.getElementById('button1').disabled = false;
+                // });
         }
     
         // Function to submit the session once all products are ranked
         function submitFinalRanking() {
             console.log('Submitting final session data for sessionId:', sessionId);
     
-            fetch('https://super-clean-repo-179616474930.us-east1.run.app/session_complete', {
+            fetch('https://javicz2.pythonanywhere.com/session_complete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -249,7 +249,7 @@
         function completeSession() {
             if (sessionId) {
                 navigator.sendBeacon(
-                    'https://super-clean-repo-179616474930.us-east1.run.app/session_complete',
+                    'https://javicz2.pythonanywhere.com/session_complete',
                     JSON.stringify({ session_id: sessionId })
                 );
                 localStorage.removeItem('sessionId');
