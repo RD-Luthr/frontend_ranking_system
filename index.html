@@ -201,14 +201,11 @@
                 // .then(data => {
                 //     console.log('Backend response:', data);
     
-                //     if (data.message === 'Session data saved successfully') {
-                //         console.log('Ranking submitted successfully for product index:', currentProductIndex + 1);
-                //         currentProductIndex++; // Move to the next product
-                //         displayProduct(); // Display the next product
-                //     } else {
-                //         console.error('Unexpected response from backend:', data);
-                //     }
-                // })
+                   
+                currentProductIndex++; // Move to the next product
+                displayProduct(); // Display the next product
+                
+            
                 // .catch(error => {
                 //     console.error('Error submitting ranking:', error);
                 //     // Re-enable the submit button in case of an error
