@@ -185,32 +185,30 @@
     
             // Send the ranking data to the backend
             fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(rankingData)
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rankingData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
             })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                })
-                .then(data => {
-                    console.log('Backend response:', data);
-    
-                   
+            .then(data => {
+                console.log('Backend response:', data);
                 currentProductIndex++; // Move to the next product
                 displayProduct(); // Display the next product
-                
-            
-                // .catch(error => {
-                //     console.error('Error submitting ranking:', error);
-                //     // Re-enable the submit button in case of an error
-                //     document.getElementById('button1').disabled = false;
-                // });
+            })
+            .catch(error => {
+                console.error('Error submitting ranking:', error);
+                // Re-enable the submit button in case of an error
+                document.getElementById('button1').disabled = false;
+            });
+
         }
     
         // Function to submit the session once all products are ranked
