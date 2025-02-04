@@ -184,22 +184,22 @@
             document.getElementById('button1').disabled = true;
     
             // Send the ranking data to the backend
-            // fetch('https://javicz2.pythonanywhere.com/session_complete', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify(rankingData)
-            // })
-                // .then(response => {
-                //     if (response.ok) {
-                //         return response.json();
-                //     } else {
-                //         throw new Error(`HTTP error! status: ${response.status}`);
-                //     }
-                // })
-                // .then(data => {
-                //     console.log('Backend response:', data);
+            fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rankingData)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    console.log('Backend response:', data);
     
                    
                 currentProductIndex++; // Move to the next product
