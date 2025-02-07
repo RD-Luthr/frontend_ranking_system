@@ -204,13 +204,12 @@
                    
                 currentProductIndex++; // Move to the next product
                 displayProduct(); // Display the next product
-                
-            
-                .catch(error => {
-                    console.error('Error submitting ranking:', error);
-                    // Re-enable the submit button in case of an error
-                    document.getElementById('button1').disabled = false;
-                });
+            })
+            .catch(error => {
+                console.error('Error submitting ranking:', error);
+                // Re-enable the submit button in case of an error
+                document.getElementById('button1').disabled = false;
+            });
         }
     
         // Function to submit the session once all products are ranked
