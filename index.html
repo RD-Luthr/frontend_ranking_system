@@ -1,11 +1,10 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Existing head content -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Ranking Survey</title>
+    <title>Product Rating Survey</title>
     <style>
         /* Existing CSS styles */
         body {
@@ -16,43 +15,8 @@
             height: 100vh;
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f0f0f0;
         }
-        .image-section{
-            margin-top: 25px;
-        }
-        .image-section img{
-            height: 30px;
-            width: 100px;
-        }
-        .custom-container {
-            display: flex;
-            flex-direction: column;
-            background-color: #ffffff;
-            text-align: center;
-            border-radius: 8px;
-            padding: 20px;
-            max-width: 385px;  
-            width: 100%;  
-            box-sizing: border-box;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .custom-container h1{
-            color: #5F5E5F;
-            margin-bottom: 0px;
-        }
-
-        .custom-container hr{
-            width: 100%;
-            border: 4px solid #e5e7eb;
-            border-radius: 8px;
-        }
-
-        .custom-container p{
-            color: #5F5E5F;
-        }
-
         .container {
             display: flex;
             justify-content: center;
@@ -60,15 +24,6 @@
             gap: 20px;
             flex-wrap: wrap;
         }
-
-        .slider-labels {
-            display: flex
-        ;
-            justify-content: space-between;
-            color: #5F5E5F;
-            font-size: 9px;
-        }
-
         .box-container {
             display: flex;
             flex-direction: column;
@@ -96,41 +51,19 @@
         .rank-text {
             margin-top: 5px;
             font-size: 1em;
-            color: #5F5E5F;
+            color: #000;
         }
         .submit-button-container {
             margin-top: 20px;
             text-align: center;
         }
-
-
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 15px;
+        #button1 {
+            display: inline-block;
+            width: 130px;
+            height: 35px;
+            font-size: 1em;
+            cursor: pointer;
         }
-
-        .button-container button {
-            text-decoration: none;
-            color: #5F5E5F;
-            background-color: transparent;
-            padding: 6px 10px;
-            border-radius: 5px;
-            font-size: 1rem;
-            border: solid 1px black;
-            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-            animation: fadeInImage 1s ease-in-out;
-        }
-
-        .button-container button:hover {
-            background-color: #69B84C;
-            color: white;
-            transform: scale(1.05);
-            border: solid 1px transparent;
-            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
-        }
-
         .completion-message {
             display: none;
             text-align: center;
@@ -138,7 +71,6 @@
             color: #6e6e6e;
             margin-top: 20px;
         }
-
         .container1 {
             display: flex;
             flex-direction: column;
@@ -150,86 +82,142 @@
             width: 40%;
             padding-bottom: 20px;
         }
-
-        @keyframes fadeInText {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInImage {
-            0% {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
     </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Rating Survey</title>
+  <style>
+    /* Your existing CSS styles */
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .box-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .box {
+      width: 250px;
+      background-color: #ffffff;
+      border: 2px solid black;
+      border-radius: 4px;
+      padding: 20px;
+      margin-bottom: 10px;
+      color: rgb(0, 0, 0);
+      font-size: 1em;
+      text-align: left;
+    }
+    .slider-container {
+      width: 250px;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .rank-slider {
+      width: 100%;
+    }
+    .rank-text {
+      margin-top: 5px;
+      font-size: 1em;
+      color: #000;
+    }
+    .submit-button-container {
+      margin-top: 20px;
+      text-align: center;
+    }
+    #button1 {
+      display: inline-block;
+      width: 130px;
+      height: 35px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .completion-message {
+      display: none;
+      text-align: center;
+      font-size: 1.5em;
+      color: #6e6e6e;
+      margin-top: 20px;
+    }
+    .container1 {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 0px;
+      flex-wrap: wrap;
+      width: 40%;
+      padding-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
-    <div class="custom-container">
-            <h1>Product Rating Survey</h1>
-            <hr>
-            
-            <!-- <p>This is a study to find out your preference for the attributes of a cellphone.<br>
-                Using the slider below the attributes please rate the phone with 10 being the highest preference and 0 being the lowest. <br>
-                Shown below are the attributes.
-            </p> -->
-            <p>Rate the set of attirbutes based on your personal prefrences</p>
-        <div class="container" id="ranking-container">
-            <div class="box-container">
-                <!-- Attributes Container -->
-                <div class="box" id="attribute-container">
-                    <!-- Dynamic product attributes will be displayed here -->
-                </div>
-                <!-- Slider Container -->
-                <div class="slider-container">
-                    <div class="slider-labels">
-                        <span>Low Preference</span>
-                        <span>High Preference</span>
-                    </div>
-                    <input type="range" min="1" max="10" value="5" class="rank-slider" oninput="this.nextElementSibling.innerText = this.value + '/10'">
-                    <div class="rank-text">5/10</div>
-                </div>
+    <div class="container1">
+        <h1>Product Rating Survey</h1>
+        <p>This is a study to find out your preference for the attributes of a cellphone.<br>
+            Using the slider below the attributes please rate the phone with 10 being the highest preference and 0 being the lowest. <br>
+            Shown below are the attributes.
+        </p>
+    </div>
+    <div class="container" id="ranking-container">
+        <div class="box-container">
+            <!-- Attributes Container -->
+            <div class="box" id="attribute-container">
+                <!-- Dynamic product attributes will be displayed here -->
+            </div>
+            <!-- Slider Container -->
+            <div class="slider-container">
+                <input type="range" min="1" max="10" value="5" class="rank-slider" oninput="this.nextElementSibling.innerText = 'Rank: ' + this.value">
+                <div class="rank-text">Rank: 5</div>
             </div>
         </div>
-
-        <div class="button-container">
-            <button onclick="submitRanking()">Submit Ranking</button>
-        </div>
-        
-
-        <div class="image-section">
-            <!-- <img src="Bonsai-trans.png" alt="Image"> -->
-            <img src="powered_by_bonsai.png" alt="Image">
     </div>
-</div>
-    
-    <!-- <div class="button-container">
-        <a href="projects.html">See Projects</a>
-        <a href="research.html">Submit Projects</a>
-        <button id="button1" onclick="submitRanking()">Submit Ranking</button>
-    </div> -->
-
-    <div class="completion-message" id="completion-message">
-        Survey Complete, thank you for your participation. Please exit this page.
-    </div>
-
+  <div class="container1">
+      <h1>Product Rating Survey</h1>
+      <p>This is a study to find out your preference for the attributes of a cellphone.<br>
+         Using the slider below the attributes please rate the phone with 10 being the highest preference and 0 being the lowest.<br>
+         Shown below are the attributes.
+      </p>
+  </div>
+  <div class="container" id="ranking-container">
+      <div class="box-container">
+          <!-- Attributes Container -->
+          <div class="box" id="attribute-container">
+              <!-- Dynamic product attributes will be displayed here -->
+          </div>
+          <!-- Slider Container -->
+          <div class="slider-container">
+              <input type="range" min="1" max="10" value="5" class="rank-slider" oninput="this.nextElementSibling.innerText = 'Rank: ' + this.value">
+              <div class="rank-text">Rank: 5</div>
+          </div>
+      </div>
+  </div>
+  <div class="submit-button-container">
+      <button id="button1" onclick="submitRanking()">Submit Ranking</button>
+  </div>
+  <div class="completion-message" id="completion-message">
+      Survey Complete, thank you for your participation. Please exit this page.
+  </div>
   <script>
       // Global variables
       let sessionData = null;    // Will hold the full session object (including individuals and scores)
       let sessionId = null;      // Session ID
       let currentProductIndex = 0;  // Tracks the current product index
       let individuals = [];         // List of individuals (phones)
-
       // Start a new session by calling the backend endpoint /get_session
       function startSession() {
           fetch('https://bonsaiacg.pythonanywhere.com/get_session')
@@ -245,18 +233,15 @@
               })
               .catch(error => console.error('Error fetching session data:', error));
       }
-
       // Display the current product's attributes
       function displayProduct() {
           const container = document.getElementById('attribute-container');
           container.innerHTML = ''; // Clear current content
-
           // If all products have been rated, submit the final session data
           if (currentProductIndex >= individuals.length) {
               submitFinalRanking();
               return;
           }
-
           // Display the current product’s details
           const product = individuals[currentProductIndex];
           for (const [key, value] of Object.entries(product)) {
@@ -264,29 +249,23 @@
               attributeDiv.textContent = `${key}: ${value}`;
               container.appendChild(attributeDiv);
           }
-
           // Reset the slider to its default value (5)
           const slider = document.querySelector('.rank-slider');
           slider.value = 5;
           slider.nextElementSibling.innerText = 'Rank: 5';
-
           // Re-enable the submit button
           document.getElementById('button1').disabled = false;
       }
-
       // Submit ranking for the current product
       function submitRanking() {
           const slider = document.querySelector('.rank-slider');
           const score = slider.value;
-
           // Update the sessionData object with the new score
           // Here we use the product index as the key (as a string) in the scores dictionary
           sessionData.scores[currentProductIndex.toString()] = score;
           console.log('Submitting ranking for product index', currentProductIndex, 'with score', score);
-
           // Disable the button to prevent duplicate submissions
           document.getElementById('button1').disabled = true;
-
           // Send the complete updated sessionData to the backend
           fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
               method: 'POST',
@@ -311,13 +290,11 @@
               document.getElementById('button1').disabled = false;
           });
       }
-
       // Submit the final session data (mark the session as complete)
       function submitFinalRanking() {
           // Mark the session as completed in our sessionData object
           sessionData.completed = true;
           console.log('Submitting final session data:', sessionData);
-
           fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -330,7 +307,6 @@
           })
           .catch(error => console.error('Error submitting final session data:', error));
       }
-
       // Display a completion message once the survey is done
       function showCompletionMessage() {
           document.getElementById('ranking-container').style.display = 'none';
@@ -339,6 +315,9 @@
           localStorage.removeItem('sessionId');
       }
 
+    <div class="submit-button-container">
+        <button id="button1" onclick="submitRanking()">Submit Ranking</button>
+    </div>
       // When the user leaves the page, mark the session as complete (if needed)
       function completeSession() {
           if (sessionId) {
@@ -350,9 +329,163 @@
           }
       }
 
+    <div class="completion-message" id="completion-message">
+        Survey Complete, thank you for your participation. Please exit this page.
+    </div>
       // Add event listener for page unload
       window.addEventListener('unload', completeSession);
 
+    <script>
+        let sessionId = null; // To store the session ID
+        let currentProductIndex = 0; // To track the current product being displayed
+        let individuals = []; // To store the list of individuals from the backend
+    
+        // Function to start a new session
+        function startSession() {
+            fetch('https://bonsaiacg.pythonanywhere.com/get_session')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Fetched session data:', data);
+                    sessionId = data.session_id;
+                    individuals = data.individuals; // Save the list of individuals
+                    currentProductIndex = 0; // Start with the first individual
+                    localStorage.setItem('sessionId', sessionId);
+    
+                    // Display the first product
+                    displayProduct();
+                })
+                .catch(error => console.error('Error fetching session data:', error));
+        }
+    
+        // Function to display the current product's attributes
+        function displayProduct() {
+            const container = document.getElementById('attribute-container');
+            container.innerHTML = ''; // Clear existing attributes
+    
+            // Check if all products have been ranked
+            if (currentProductIndex >= individuals.length) {
+                submitFinalRanking(); // Submit the session when all products are ranked
+                return;
+            }
+    
+            // Get the current product and display its attributes
+            const product = individuals[currentProductIndex];
+            for (const [key, value] of Object.entries(product)) {
+                const attributeDiv = document.createElement('div');
+                attributeDiv.textContent = `${key}: ${value}`;
+                container.appendChild(attributeDiv);
+            }
+    
+            // Reset slider to default value
+            const slider = document.querySelector('.rank-slider');
+            slider.value = 5;
+            slider.nextElementSibling.innerText = 'Rank: 5';
+    
+            // Re-enable the submit button
+            document.getElementById('button1').disabled = false;
+        }
+    
+        // Function to submit the ranking for the current product
+        function submitRanking() {
+            const slider = document.querySelector('.rank-slider');
+            const score = slider.value;
+    
+            // Create the ranking data for the current product
+            const rankingData = {
+                session_id: sessionId,
+                product_index: currentProductIndex + 1, // Indexing starts at 1 for user clarity
+                score: score
+            };
+    
+            console.log('Submitting ranking data:', rankingData);
+    
+            // Disable the submit button to prevent multiple clicks
+            document.getElementById('button1').disabled = true;
+    
+            // Send the ranking data to the backend
+            fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rankingData)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    console.log('Backend response:', data);
+    
+                   
+                currentProductIndex++; // Move to the next product
+                displayProduct(); // Display the next product
+            })
+            .catch(error => {
+                console.error('Error submitting ranking:', error);
+                // Re-enable the submit button in case of an error
+                document.getElementById('button1').disabled = false;
+            });
+        }
+    
+        // Function to submit the session once all products are ranked
+        function submitFinalRanking() {
+            console.log('Submitting final session data for sessionId:', sessionId);
+    
+            fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ session_id: sessionId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Final session submitted:', data.message);
+                    showCompletionMessage();
+                })
+                .catch(error => console.error('Error submitting final session data:', error));
+        }
+    
+        // Function to show the completion message and hide ranking elements
+        function showCompletionMessage() {
+            document.getElementById('ranking-container').style.display = 'none';
+            document.getElementById('button1').style.display = 'none';
+            document.getElementById('completion-message').style.display = 'block';
+    
+            // Clear sessionId from localStorage
+            localStorage.removeItem('sessionId');
+        }
+    
+        // Function to mark the session as completed when the user leaves
+        function completeSession() {
+            if (sessionId) {
+                navigator.sendBeacon(
+                    'https://bonsaiacg.pythonanywhere.com/session_complete',
+                    JSON.stringify({ session_id: sessionId })
+                );
+                localStorage.removeItem('sessionId');
+            }
+        }
+    
+        // Add event listener for page unload
+        window.addEventListener('unload', completeSession);
+    
+        // Load the session when the page loads
+        window.onload = function () {
+            sessionId = localStorage.getItem('sessionId');
+            if (!sessionId) {
+                startSession();
+            } else {
+                console.log('Resuming session with sessionId:', sessionId);
+                // Fetch and reload existing session data if necessary
+                startSession(); // This fetches session data anew
+            }
+        };
+    </script>
       // On page load, start a new session (or resume if sessionId exists)
       window.onload = function () {
           sessionId = localStorage.getItem('sessionId');
