@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Rating Survey</title>
   <style>
-    /* Your existing CSS styles */
+    /* Updated styling */
     body {
       display: flex;
       flex-direction: column;
@@ -15,7 +14,31 @@
       height: 100vh;
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
+      background-color: #f4f4f4;
+    }
+    .custom-container {
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 385px;
+      width: 100%;
+      box-sizing: border-box;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .custom-container h1 {
+      color: #5F5E5F;
+      margin-bottom: 0px;
+    }
+    .custom-container hr {
+      width: 100%;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+    }
+    .custom-container p {
+      color: #5F5E5F;
     }
     .container {
       display: flex;
@@ -51,18 +74,28 @@
     .rank-text {
       margin-top: 5px;
       font-size: 1em;
-      color: #000;
+      color: #5F5E5F;
     }
     .submit-button-container {
       margin-top: 20px;
       text-align: center;
     }
-    #button1 {
-      display: inline-block;
-      width: 130px;
-      height: 35px;
-      font-size: 1em;
-      cursor: pointer;
+    .button-container button {
+      text-decoration: none;
+      color: #5F5E5F;
+      background-color: transparent;
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-size: 1rem;
+      border: solid 1px black;
+      transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .button-container button:hover {
+      background-color: #69B84C;
+      color: white;
+      transform: scale(1.05);
+      border: solid 1px transparent;
+      box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
     }
     .completion-message {
       display: none;
@@ -71,50 +104,32 @@
       color: #6e6e6e;
       margin-top: 20px;
     }
-    .container1 {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      gap: 0px;
-      flex-wrap: wrap;
-      width: 40%;
-      padding-bottom: 20px;
-    }
   </style>
 </head>
 <body>
-  <div class="container1">
-      <h1>Product Rating Survey</h1>
-      <p>This is a study to find out your preference for the attributes of a cellphone.<br>
-         Using the slider below the attributes please rate the phone with 10 being the highest preference and 0 being the lowest.<br>
-         Shown below are the attributes.
-      </p>
+  <div class="custom-container">
+    <h1>Product Rating Survey</h1>
+    <hr>
+    <p>Rate the set of attributes based on your personal preferences.</p>
   </div>
   <div class="container" id="ranking-container">
-      <div class="box-container">
-          <!-- Attributes Container -->
-          <div class="box" id="attribute-container">
-              <!-- Dynamic product attributes will be displayed here -->
-          </div>
-          <!-- Slider Container -->
-          <div class="slider-container">
-              <input type="range" min="1" max="10" value="5" class="rank-slider" oninput="this.nextElementSibling.innerText = 'Rank: ' + this.value">
-              <div class="rank-text">Rank: 5</div>
-          </div>
+    <div class="box-container">
+      <div class="box" id="attribute-container">
+        <!-- Dynamic product attributes will be displayed here -->
       </div>
+      <div class="slider-container">
+        <input type="range" min="1" max="10" value="5" class="rank-slider" oninput="this.nextElementSibling.innerText = 'Rank: ' + this.value">
+        <div class="rank-text">Rank: 5</div>
+      </div>
+    </div>
   </div>
-
   <div class="submit-button-container">
-      <button id="button1" onclick="submitRanking()">Submit Ranking</button>
+    <button id="button1" onclick="submitRanking()">Submit Ranking</button>
   </div>
-
   <div class="completion-message" id="completion-message">
-      Survey Complete, thank you for your participation. Please exit this page.
+    Survey Complete, thank you for your participation. Please exit this page.
   </div>
-
-  <script>
+    <script>
       // Global variables
       let sessionData = null;    // Will hold the full session object (including individuals and scores)
       let sessionId = null;      // Session ID
