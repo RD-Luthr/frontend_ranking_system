@@ -203,7 +203,7 @@
         </div>
 
         <div class="button-container">
-            <button id="button1" onclick="submitRanking()">Submit Ranking</button>
+            <button onclick="submitRanking()">Submit Ranking</button>
         </div>
         
 
@@ -333,7 +333,6 @@
 
       // Display a completion message once the survey is done
       function showCompletionMessage() {
-          document.getElementById('custom-container').style.display = 'none';
           document.getElementById('ranking-container').style.display = 'none';
           document.getElementById('button1').style.display = 'none';
           document.getElementById('completion-message').style.display = 'block';
