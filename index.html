@@ -116,146 +116,144 @@
 
   <script>
       // Global variables
-      let sessionData = null;    // Will hold the full session object (including individuals and scores)
-      let sessionId = null;      // Session ID
-      let currentProductIndex = 0;  // Tracks the current product index
-      let individuals = [];         // List of individuals (phones)
+let sessionData = null;    // Will hold the full session object (including individuals and scores)
+let sessionId = null;      // Session ID
+let currentProductIndex = 0;  // Tracks the current product index
+let individuals = [];         // List of individuals (phones)
 
-      // Start a new session by calling the backend endpoint /get_session
-      function startSession() {
-          fetch('https://bonsaiacg.pythonanywhere.com/get_session')
-              .then(response => response.json())
-              .then(data => {
-                  console.log('Fetched session data:', data);
-                  sessionData = data;         // Store the full session object
-                  sessionId = data.session_id;  // Extract session ID
-                  individuals = data.individuals; // Get the list of individuals
-                  currentProductIndex = 0;      // Start at the beginning
-                  localStorage.setItem('sessionId', sessionId);
-                  displayProduct();
-              })
-              .catch(error => console.error('Error fetching session data:', error));
-      }
+// Start a new session by calling the backend endpoint /get_session
+function startSession() {
+    fetch('https://bonsaiacg.pythonanywhere.com/get_session')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Fetched session data:', data);
+            sessionData = data;         // Store the full session object
+            sessionId = data.session_id;  // Extract session ID
+            individuals = data.individuals; // Get the list of individuals
+            currentProductIndex = 0;      // Start at the beginning
+            localStorage.setItem('sessionId', sessionId);
+            displayProduct();
+        })
+        .catch(error => console.error('Error fetching session data:', error));
+}
 
-      // Display the current product's attributes
-      function displayProduct() {
-          const container = document.getElementById('attribute-container');
-          container.innerHTML = ''; // Clear current content
+// Display the current product's attributes
+function displayProduct() {
+    const container = document.getElementById('attribute-container');
+    container.innerHTML = ''; // Clear current content
 
-          // If all products have been rated, submit the final session data
-          if (currentProductIndex >= individuals.length) {
-              submitFinalRanking();
-              return;
-          }
+    // If all products have been rated, submit the final session data
+    if (currentProductIndex >= individuals.length) {
+        submitFinalRanking();
+        return;
+    }
 
-          // Display the current product’s details
-          const product = individuals[currentProductIndex];
-          for (const [key, value] of Object.entries(product)) {
-              const attributeDiv = document.createElement('div');
-              attributeDiv.textContent = `${key}: ${value}`;
-              container.appendChild(attributeDiv);
-          }
+    // Display the current product's details
+    const product = individuals[currentProductIndex];
+    for (const [key, value] of Object.entries(product)) {
+        const attributeDiv = document.createElement('div');
+        attributeDiv.textContent = `${key}: ${value}`;
+        container.appendChild(attributeDiv);
+    }
 
-          // Reset the slider to its default value (5)
-          const slider = document.querySelector('.rank-slider');
-          slider.value = 5;
-          slider.nextElementSibling.innerText = 'Rank: 5';
+    // Reset the slider to its default value (5)
+    const slider = document.querySelector('.rank-slider');
+    slider.value = 5;
+    slider.nextElementSibling.innerText = 'Rank: 5';
 
-          // Re-enable the submit button
-          document.getElementById('button1').disabled = false;
-      }
+    // Re-enable the submit button
+    document.getElementById('button1').disabled = false;
+}
 
-      // Submit ranking for the current product
-      function submitRanking() {
-          const slider = document.querySelector('.rank-slider');
-          const score = slider.value;
+// Submit ranking for the current product
+function submitRanking() {
+    const slider = document.querySelector('.rank-slider');
+    const score = parseInt(slider.value);
 
-          // Update the sessionData object with the new score
-          // Here we use the product index as the key (as a string) in the scores dictionary
-          sessionData.scores[currentProductIndex.toString()] = score;
-          console.log('Submitting ranking for product index', currentProductIndex, 'with score', score);
+    // Update the sessionData object with the new score
+    // Here we use the product index as the key (as a string) in the scores dictionary
+    sessionData.scores[currentProductIndex.toString()] = score;
+    console.log('Submitting ranking for product index', currentProductIndex, 'with score', score);
 
-          // Disable the button to prevent duplicate submissions
-          document.getElementById('button1').disabled = true;
+    // Move to the next product without sending to backend yet
+    currentProductIndex++;
+    
+    // Check if we've reached the end of products
+    if (currentProductIndex >= individuals.length) {
+        // If this is the last product, mark as complete and send to backend
+        sessionData.completed = true;
+        submitFinalRanking();
+    } else {
+        // Otherwise, just display the next product
+        displayProduct();
+    }
+}
 
-          // Send the complete updated sessionData to the backend
-          fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(sessionData)
-          })
-          .then(response => {
-              if (response.ok) {
-                  return response.json();
-              } else {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-              }
-          })
-          .then(data => {
-              console.log('Backend response:', data);
-              // Move to the next product after successful submission
-              currentProductIndex++;
-              displayProduct();
-          })
-          .catch(error => {
-              console.error('Error submitting ranking:', error);
-              document.getElementById('button1').disabled = false;
-          });
-      }
+// Submit the final session data (mark the session as complete)
+function submitFinalRanking() {
+    // Mark the session as completed in our sessionData object
+    sessionData.completed = true;
+    console.log('Submitting final session data:', sessionData);
 
-      // Submit the final session data (mark the session as complete)
-      function submitFinalRanking() {
-          // Mark the session as completed in our sessionData object
-          sessionData.completed = true;
-          console.log('Submitting final session data:', sessionData);
+    // Disable the button to prevent duplicate submissions
+    document.getElementById('button1').disabled = true;
 
-          fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(sessionData)
-          })
-          .then(response => response.json())
-          .then(data => {
-              console.log('Final session submitted:', data.message);
-              showCompletionMessage();
-          })
-          .catch(error => console.error('Error submitting final session data:', error));
-      }
+    fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sessionData)
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    })
+    .then(data => {
+        console.log('Final session submitted:', data.message);
+        showCompletionMessage();
+    })
+    .catch(error => {
+        console.error('Error submitting final session data:', error);
+        document.getElementById('button1').disabled = false;
+    });
+}
 
-      // Display a completion message once the survey is done
-      function showCompletionMessage() {
-          document.getElementById('ranking-container').style.display = 'none';
-          document.getElementById('button1').style.display = 'none';
-          document.getElementById('completion-message').style.display = 'block';
-          localStorage.removeItem('sessionId');
-      }
+// Display a completion message once the survey is done
+function showCompletionMessage() {
+    document.getElementById('ranking-container').style.display = 'none';
+    document.getElementById('button1').style.display = 'none';
+    document.getElementById('completion-message').style.display = 'block';
+    localStorage.removeItem('sessionId');
+}
 
-      // When the user leaves the page, mark the session as complete (if needed)
-      function completeSession() {
-          if (sessionId) {
-              navigator.sendBeacon(
-                  'https://bonsaiacg.pythonanywhere.com/session_complete',
-                  JSON.stringify({ session_id: sessionId })
-              );
-              localStorage.removeItem('sessionId');
-          }
-      }
+// When the user leaves the page, mark the session as complete (if needed)
+function completeSession() {
+    if (sessionId) {
+        navigator.sendBeacon(
+            'https://bonsaiacg.pythonanywhere.com/session_complete',
+            JSON.stringify({ session_id: sessionId })
+        );
+        localStorage.removeItem('sessionId');
+    }
+}
 
-      // Add event listener for page unload
-      window.addEventListener('unload', completeSession);
+// Add event listener for page unload
+window.addEventListener('unload', completeSession);
 
-      // On page load, start a new session (or resume if sessionId exists)
-      window.onload = function () {
-          sessionId = localStorage.getItem('sessionId');
-          if (!sessionId) {
-              startSession();
-          } else {
-              console.log('Resuming session with sessionId:', sessionId);
-              // Optionally, you might want to fetch the existing session data here.
-              // For simplicity, we start a new session.
-              startSession();
-          }
-      };
+// On page load, start a new session (or resume if sessionId exists)
+window.onload = function () {
+    sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+        startSession();
+    } else {
+        console.log('Resuming session with sessionId:', sessionId);
+        // Optionally, you might want to fetch the existing session data here.
+        // For simplicity, we start a new session.
+        startSession();
+    }
+};
   </script>
 </body>
 </html>
