@@ -204,12 +204,16 @@ function submitFinalRanking() {
         body: JSON.stringify(sessionData)
     })
     .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        console.log("Response status:", response.status);
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error("Error response body:", text);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            });
         }
+        return response.json();
     })
+
     .then(data => {
         console.log('Final session submitted:', data.message);
         showCompletionMessage();
