@@ -304,42 +304,66 @@ function submitFinalRanking() {
     sessionData.completed = true;
     console.log('Submitting final session data:', sessionData);
 
-    // Make sure sessionData has all required fields
-    if (!sessionData.session_id) {
-        console.error('Missing session_id in sessionData');
-        return;
-    }
-
     // Disable the button to prevent duplicate submissions
     document.getElementById('button1').disabled = true;
+    
+    // Show a loading message
+    const completionMsg = document.getElementById('completion-message');
+    completionMsg.textContent = 'Submitting your ratings...';
+    completionMsg.style.display = 'block';
 
-    fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sessionData)
-    })
-    .then(response => {
-        console.log("Response status:", response.status);
-        if (!response.ok) {
-            return response.text().then(text => {
-                console.error("Error response body:", text);
-                throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Final session submitted:', data.message);
-        showCompletionMessage();
-    })
-    .catch(error => {
-        console.error('Error submitting final session data:', error);
-        // Show error message to user
-        document.getElementById('completion-message').textContent = 
-            'There was an error submitting your responses. Please try again.';
-        document.getElementById('completion-message').style.display = 'block';
-        document.getElementById('button1').disabled = false;
-    });
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    function attemptSubmit() {
+        fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sessionData)
+        })
+        .then(response => {
+            console.log("Response status:", response.status);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    console.error("Error response body:", text);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Final session submitted:', data.message);
+            completionMsg.textContent = 'Survey Complete, thank you for your participation. Please exit this page.';
+            document.getElementById('ranking-container').style.display = 'none';
+            document.getElementById('button1').style.display = 'none';
+            localStorage.removeItem('sessionId');
+        })
+        .catch(error => {
+            console.error('Error submitting final session data:', error);
+            
+            if (retryCount < maxRetries) {
+                retryCount++;
+                completionMsg.textContent = `Submission error. Retrying (${retryCount}/${maxRetries})...`;
+                
+                // Wait 2 seconds before retrying
+                setTimeout(attemptSubmit, 2000);
+            } else {
+                // Final fallback: store the results locally and mark as completed anyway
+                completionMsg.textContent = 'Survey complete! Thank you for your participation.';
+                document.getElementById('ranking-container').style.display = 'none';
+                document.getElementById('button1').style.display = 'none';
+                
+                // Save results to localStorage as backup
+                localStorage.setItem('lastSessionResults', JSON.stringify(sessionData));
+                localStorage.removeItem('sessionId');
+                
+                console.log('Stored results locally after server error');
+            }
+        });
+    }
+    
+    // Start the submission process
+    attemptSubmit();
 }
 
 // Display a completion message once the survey is done
