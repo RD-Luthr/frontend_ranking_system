@@ -336,6 +336,7 @@ function submitFinalRanking() {
             completionMsg.textContent = 'Survey Complete, thank you for your participation. Please exit this page.';
             document.getElementById('ranking-container').style.display = 'none';
             document.getElementById('button1').style.display = 'none';
+            document.getElementById("custom-container").style.display = 'none';
             localStorage.removeItem('sessionId');
         })
         .catch(error => {
@@ -352,6 +353,7 @@ function submitFinalRanking() {
                 completionMsg.textContent = 'Survey complete! Thank you for your participation.';
                 document.getElementById('ranking-container').style.display = 'none';
                 document.getElementById('button1').style.display = 'none';
+                document.getElementById("custom-container").style.display = 'none';
                 
                 // Save results to localStorage as backup
                 localStorage.setItem('lastSessionResults', JSON.stringify(sessionData));
@@ -371,6 +373,7 @@ function showCompletionMessage() {
     document.getElementById('ranking-container').style.display = 'none';
     document.getElementById('button1').style.display = 'none';
     document.getElementById('completion-message').style.display = 'block';
+    document.getElementById("custom-container").style.display = 'none';
     localStorage.removeItem('sessionId');
 }
 
