@@ -304,6 +304,12 @@ function submitFinalRanking() {
     sessionData.completed = true;
     console.log('Submitting final session data:', sessionData);
 
+    // Make sure sessionData has all required fields
+    if (!sessionData.session_id) {
+        console.error('Missing session_id in sessionData');
+        return;
+    }
+
     // Disable the button to prevent duplicate submissions
     document.getElementById('button1').disabled = true;
 
@@ -317,18 +323,21 @@ function submitFinalRanking() {
         if (!response.ok) {
             return response.text().then(text => {
                 console.error("Error response body:", text);
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
             });
         }
         return response.json();
     })
-
     .then(data => {
         console.log('Final session submitted:', data.message);
         showCompletionMessage();
     })
     .catch(error => {
         console.error('Error submitting final session data:', error);
+        // Show error message to user
+        document.getElementById('completion-message').textContent = 
+            'There was an error submitting your responses. Please try again.';
+        document.getElementById('completion-message').style.display = 'block';
         document.getElementById('button1').disabled = false;
     });
 }
