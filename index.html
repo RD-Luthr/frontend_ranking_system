@@ -299,60 +299,39 @@ function submitRanking() {
 }
 
 // Submit the final session data (mark the session as complete)
+// Simplified submitFinalRanking function
 function submitFinalRanking() {
-    const completionMsg = document.getElementById('completion-message');
-    if (completionMsg) completionMsg.textContent = 'Submitting your ratings...';
+    const completionMsg = document.querySelector('.completion-message');
+    if (completionMsg) {
+        completionMsg.textContent = 'Submitting your ratings...';
+        completionMsg.style.display = 'block';
+    }
 
     document.getElementById('button1').disabled = true;
 
-    function attemptSubmit(retryCount = 0, maxRetries = 3) {
-        fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(sessionData)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Final session submitted:", data.message);
+    fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
+        method: 'POST',
+        body: JSON.stringify(sessionData),
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Final session submitted:", data.message);
+        if (completionMsg) {
+            completionMsg.textContent = 'Survey completed. Thank you!';
+        }
 
-            if (completionMessage) completionMessage.textContent = 'Your ratings were successfully submitted!';
-            if (completionMessage) completionMessage.style.display = 'block';
-
-            const container = document.querySelector('.custom-container');
-            if (container) container.style.display = 'none';
-
-            if (rankingContainer) rankingContainer.style.display = 'none';
-            if (button) button.style.display = 'none';
-        })
-        .catch(error => {
-            console.error('Error submitting:', error);
-            if (retryCount < maxRetries) {
-                retryCount++;
-                if (completionMessage) completionMessage.textContent = `Submission error. Retrying (${retryCount}/${maxRetries})...`;
-                setTimeout(() => attemptSubmit(retryCount, maxRetries), 2000);
-            } else {
-                if (completionMessage) completionMessage.textContent = 'Submission failed. Your responses have been saved locally.';
-                if (completionMessage) completionMessage.style.display = 'block';
-
-                // Hide the elements if they exist
-                if (rankingContainer) rankingContainer.style.display = 'none';
-                if (button) button.style.display = 'none';
-
-                // Backup localStorage or alternative saving here if desired
-            }
-        })
-        .catch(error => {
-            console.error("Unexpected error:", error);
-        });
-    }
-
-    attemptSubmit();
+        // Hide everything else cleanly
+        document.querySelector('.custom-container').style.display = 'none';
+    })
+    .catch(error => {
+        console.error("Submission failed:", error);
+        if (completionMsg) {
+            completionMsg.textContent = 'Survey submission failed. Please refresh the page.';
+        }
+    });
 }
+
 
 
 // Display a completion message once the survey is done
