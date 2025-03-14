@@ -224,40 +224,36 @@
     </div>
 
   <script>
-      // Global variables
-let sessionData = null;    // Will hold the full session object (including individuals and scores)
-let sessionId = null;      // Session ID
-let currentProductIndex = 0;  // Tracks the current product index
-let individuals = [];         // List of individuals (phones)
+// Global variables
+let sessionData = null;
+let sessionId = null;
+let currentProductIndex = 0;
+let individuals = [];
 
-// Start a new session by calling the backend endpoint /get_session
+// Start session and fetch data
 function startSession() {
     fetch('https://bonsaiacg.pythonanywhere.com/get_session')
         .then(response => response.json())
         .then(data => {
-            console.log('Fetched session data:', data);
-            sessionData = data;         // Store the full session object
-            sessionId = data.session_id;  // Extract session ID
-            individuals = data.individuals; // Get the list of individuals
-            currentProductIndex = 0;      // Start at the beginning
+            sessionData = data;
+            sessionId = data.session_id;
+            individuals = data.individuals;
             localStorage.setItem('sessionId', sessionId);
             displayProduct();
         })
-        .catch(error => console.error('Error fetching session data:', error));
+        .catch(err => console.error('Error starting session:', err));
 }
 
-// Display the current product's attributes
+// Display product attributes
 function displayProduct() {
     const container = document.getElementById('attribute-container');
-    container.innerHTML = ''; // Clear current content
+    container.innerHTML = '';
 
-    // If all products have been rated, submit the final session data
     if (currentProductIndex >= individuals.length) {
         submitFinalRanking();
         return;
     }
 
-    // Display the current product's details
     const product = individuals[currentProductIndex];
     for (const [key, value] of Object.entries(product)) {
         const attributeDiv = document.createElement('div');
@@ -265,84 +261,60 @@ function displayProduct() {
         container.appendChild(attributeDiv);
     }
 
-    // Reset the slider to its default value (5)
     const slider = document.querySelector('.rank-slider');
     slider.value = 5;
     slider.nextElementSibling.innerText = '5/10';
 
-    // Re-enable the submit button
     document.getElementById('button1').disabled = false;
 }
 
-// Submit ranking for the current product
+// Handle user ranking submission
 function submitRanking() {
     const slider = document.querySelector('.rank-slider');
     const score = parseInt(slider.value);
-
-    // Update the sessionData object with the new score
-    // Here we use the product index as the key (as a string) in the scores dictionary
     sessionData.scores[currentProductIndex.toString()] = score;
-    console.log('Submitting ranking for product index', currentProductIndex, 'with score', score);
 
-    // Move to the next product without sending to backend yet
     currentProductIndex++;
-    
-    // Check if we've reached the end of products
     if (currentProductIndex >= individuals.length) {
-        // If this is the last product, mark as complete and send to backend
-        sessionData.completed = true;
         submitFinalRanking();
     } else {
-        // Otherwise, just display the next product
         displayProduct();
     }
 }
 
-// Submit the final session data (mark the session as complete)
-// Simplified submitFinalRanking function
+// Submit final results to backend
 function submitFinalRanking() {
-    const completionMsg = document.querySelector('.completion-message');
-    if (completionMsg) {
-        completionMsg.textContent = 'Submitting your ratings...';
-        completionMsg.style.display = 'block';
-    }
+    sessionData.completed = true;
+    const completionMsg = document.getElementById('completion-message');
+    completionMsg.textContent = 'Submitting your ratings...';
+    completionMsg.style.display = 'block';
 
+    // Disable interaction
     document.getElementById('button1').disabled = true;
 
     fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
         method: 'POST',
-        body: JSON.stringify(sessionData),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sessionData)
     })
     .then(response => response.json())
     .then(data => {
-        console.log("Final session submitted:", data.message);
-        if (completionMsg) {
-            completionMsg.textContent = 'Survey completed. Thank you!';
-        }
+        console.log("Submission success:", data.message);
+        completionMsg.textContent = 'Survey Complete, thank you for your participation. Please exit this page.';
 
-        // Hide everything else cleanly
-        document.querySelector('.custom-container').style.display = 'none';
+        // Clear all content except completion message
+        const customContainer = document.querySelector('.custom-container');
+        if (customContainer) customContainer.style.display = 'none';
+
+        localStorage.removeItem('sessionId');
     })
-    .catch(error => {
-        console.error("Submission failed:", error);
-        if (completionMsg) {
-            completionMsg.textContent = 'Survey submission failed. Please refresh the page.';
-        }
+    .catch(err => {
+        console.error("Submission error:", err);
+        completionMsg.textContent = 'Survey submission failed. Please exit this page.';
     });
 }
 
-
-
-// Display a completion message once the survey is done
-function showCompletionMessage() {
-    document.getElementById('ranking-container').style.display = 'none';
-    document.getElementById('button1').style.display = 'none';
-    document.getElementById('completion-message').style.display = 'block';
-    localStorage.removeItem('sessionId');
-}
-
-// When the user leaves the page, mark the session as complete (if needed)
+// Mark session complete if user exits
 function completeSession() {
     if (sessionId) {
         navigator.sendBeacon(
@@ -353,21 +325,14 @@ function completeSession() {
     }
 }
 
-// Add event listener for page unload
+// Event listeners
 window.addEventListener('unload', completeSession);
 
-// On page load, start a new session (or resume if sessionId exists)
 window.onload = function () {
     sessionId = localStorage.getItem('sessionId');
-    if (!sessionId) {
-        startSession();
-    } else {
-        console.log('Resuming session with sessionId:', sessionId);
-        // Optionally, you might want to fetch the existing session data here.
-        // For simplicity, we start a new session.
-        startSession();
-    }
+    startSession();
 };
+
   </script>
 </body>
 </html>
