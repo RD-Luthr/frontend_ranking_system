@@ -268,7 +268,7 @@ function displayProduct() {
     // Reset the slider to its default value (5)
     const slider = document.querySelector('.rank-slider');
     slider.value = 5;
-    slider.nextElementSibling.innerText = 'Rank: 5';
+    slider.nextElementSibling.innerText = '5/10';
 
     // Re-enable the submit button
     document.getElementById('button1').disabled = false;
@@ -334,9 +334,18 @@ function submitFinalRanking() {
         .then(data => {
             console.log('Final session submitted:', data.message);
             completionMsg.textContent = 'Survey Complete, thank you for your participation. Please exit this page.';
-            document.getElementById('ranking-container').style.display = 'none';
-            document.getElementById('button1').style.display = 'none';
-            document.getElementById("custom-container").style.display = 'none';
+            
+            // Hide elements safely by checking if they exist first
+            const rankingContainer = document.getElementById('ranking-container');
+            if (rankingContainer) rankingContainer.style.display = 'none';
+            
+            const button = document.getElementById('button1');
+            if (button) button.style.display = 'none';
+            
+            // Fix: Use querySelector for class instead of getElementById
+            const container = document.querySelector('.custom-container');
+            if (container) container.style.display = 'none';
+            
             localStorage.removeItem('sessionId');
         })
         .catch(error => {
@@ -351,9 +360,17 @@ function submitFinalRanking() {
             } else {
                 // Final fallback: store the results locally and mark as completed anyway
                 completionMsg.textContent = 'Survey complete! Thank you for your participation.';
-                document.getElementById('ranking-container').style.display = 'none';
-                document.getElementById('button1').style.display = 'none';
-                document.getElementById("custom-container").style.display = 'none';
+                
+                // Hide elements safely
+                const rankingContainer = document.getElementById('ranking-container');
+                if (rankingContainer) rankingContainer.style.display = 'none';
+                
+                const button = document.getElementById('button1');
+                if (button) button.style.display = 'none';
+                
+                // Fix: Use querySelector for class instead of getElementById
+                const container = document.querySelector('.custom-container');
+                if (container) container.style.display = 'none';
                 
                 // Save results to localStorage as backup
                 localStorage.setItem('lastSessionResults', JSON.stringify(sessionData));
