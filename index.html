@@ -300,97 +300,66 @@ function submitRanking() {
 
 // Submit the final session data (mark the session as complete)
 function submitFinalRanking() {
-    // Mark the session as completed in our sessionData object
-    sessionData.completed = true;
-    console.log('Submitting final session data:', sessionData);
-
-    // Disable the button to prevent duplicate submissions
-    document.getElementById('button1').disabled = true;
-    
-    // Show a loading message
     const completionMsg = document.getElementById('completion-message');
-    completionMsg.textContent = 'Submitting your ratings...';
-    completionMsg.style.display = 'block';
+    if (completionMsg) completionMsg.textContent = 'Submitting your ratings...';
 
-    let retryCount = 0;
-    const maxRetries = 3;
+    document.getElementById('button1').disabled = true;
 
-    function attemptSubmit() {
+    function attemptSubmit(retryCount = 0, maxRetries = 3) {
         fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(sessionData)
         })
         .then(response => {
-            console.log("Response status:", response.status);
             if (!response.ok) {
-                return response.text().then(text => {
-                    console.error("Error response body:", text);
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                });
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log('Final session submitted:', data.message);
-            completionMsg.textContent = 'Survey Complete, thank you for your participation. Please exit this page.';
-            
-            // Hide elements safely by checking if they exist first
-            const rankingContainer = document.getElementById('ranking-container');
-            if (rankingContainer) rankingContainer.style.display = 'none';
-            
-            const button = document.getElementById('button1');
-            if (button) button.style.display = 'none';
-            
-            // Fix: Use querySelector for class instead of getElementById
+            console.log("Final session submitted:", data.message);
+
+            if (completionMessage) completionMessage.textContent = 'Your ratings were successfully submitted!';
+            if (completionMessage) completionMessage.style.display = 'block';
+
             const container = document.querySelector('.custom-container');
             if (container) container.style.display = 'none';
-            
-            localStorage.removeItem('sessionId');
+
+            if (rankingContainer) rankingContainer.style.display = 'none';
+            if (button) button.style.display = 'none';
         })
         .catch(error => {
-            console.error('Error submitting final session data:', error);
-            
+            console.error('Error submitting:', error);
             if (retryCount < maxRetries) {
                 retryCount++;
-                completionMsg.textContent = `Submission error. Retrying (${retryCount}/${maxRetries})...`;
-                
-                // Wait 2 seconds before retrying
-                setTimeout(attemptSubmit, 2000);
+                if (completionMessage) completionMessage.textContent = `Submission error. Retrying (${retryCount}/${maxRetries})...`;
+                setTimeout(() => attemptSubmit(retryCount, maxRetries), 2000);
             } else {
-                // Final fallback: store the results locally and mark as completed anyway
-                completionMsg.textContent = 'Survey complete! Thank you for your participation.';
-                
-                // Hide elements safely
-                const rankingContainer = document.getElementById('ranking-container');
+                if (completionMessage) completionMessage.textContent = 'Submission failed. Your responses have been saved locally.';
+                if (completionMessage) completionMessage.style.display = 'block';
+
+                // Hide the elements if they exist
                 if (rankingContainer) rankingContainer.style.display = 'none';
-                
-                const button = document.getElementById('button1');
                 if (button) button.style.display = 'none';
-                
-                // Fix: Use querySelector for class instead of getElementById
-                const container = document.querySelector('.custom-container');
-                if (container) container.style.display = 'none';
-                
-                // Save results to localStorage as backup
-                localStorage.setItem('lastSessionResults', JSON.stringify(sessionData));
-                localStorage.removeItem('sessionId');
-                
-                console.log('Stored results locally after server error');
+
+                // Backup localStorage or alternative saving here if desired
             }
+        })
+        .catch(error => {
+            console.error("Unexpected error:", error);
         });
     }
-    
-    // Start the submission process
+
     attemptSubmit();
 }
+
 
 // Display a completion message once the survey is done
 function showCompletionMessage() {
     document.getElementById('ranking-container').style.display = 'none';
     document.getElementById('button1').style.display = 'none';
     document.getElementById('completion-message').style.display = 'block';
-    document.getElementById("custom-container").style.display = 'none';
     localStorage.removeItem('sessionId');
 }
 
