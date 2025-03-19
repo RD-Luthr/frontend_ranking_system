@@ -232,33 +232,48 @@ let individuals = [];
 
 // Start session and fetch data
 function startSession() {
+    console.log("=== Starting new session ===");
     fetch('https://bonsaiacg.pythonanywhere.com/get_session')
-        .then(response => response.json())
+        .then(response => {
+            console.log(`Session request status: ${response.status} ${response.statusText}`);
+            return response.json();
+        })
         .then(data => {
+            console.log("Session data received:", data);
             sessionData = data;
             sessionId = data.session_id;
             individuals = data.individuals;
+            console.log(`Session ID: ${sessionId}`);
+            console.log(`Number of individuals to rate: ${individuals.length}`);
             localStorage.setItem('sessionId', sessionId);
             displayProduct();
         })
-        .catch(err => console.error('Error starting session:', err));
+        .catch(err => {
+            console.error('Error starting session:', err);
+            alert("Failed to start session. Please refresh the page.");
+        });
 }
 
 // Display product attributes
 function displayProduct() {
+    console.log(`\n=== Displaying product ${currentProductIndex+1}/${individuals.length} ===`);
     const container = document.getElementById('attribute-container');
     container.innerHTML = '';
 
     if (currentProductIndex >= individuals.length) {
+        console.log("All products rated - proceeding to final submission");
         submitFinalRanking();
         return;
     }
 
     const product = individuals[currentProductIndex];
+    console.log("Current product attributes:", product);
+    
     for (const [key, value] of Object.entries(product)) {
         const attributeDiv = document.createElement('div');
         attributeDiv.textContent = `${key}: ${value}`;
         container.appendChild(attributeDiv);
+        console.log(`  ${key}: ${value}`);
     }
 
     const slider = document.querySelector('.rank-slider');
@@ -266,40 +281,67 @@ function displayProduct() {
     slider.nextElementSibling.innerText = '5/10';
 
     document.getElementById('button1').disabled = false;
+    console.log("Product displayed successfully. Default rating: 5/10");
 }
 
 // Handle user ranking submission
 function submitRanking() {
     const slider = document.querySelector('.rank-slider');
     const score = parseInt(slider.value);
+    console.log(`\n=== Submitting rating for product ${currentProductIndex+1}/${individuals.length} ===`);
+    console.log(`Rating: ${score}/10`);
+    
+    // Initialize scores object if it doesn't exist
+    if (!sessionData.scores) {
+        sessionData.scores = {};
+        console.log("Initialized scores object");
+    }
+    
     sessionData.scores[currentProductIndex.toString()] = score;
+    console.log("Current scores:", sessionData.scores);
+    console.log(`Scores collected: ${Object.keys(sessionData.scores).length}/${individuals.length}`);
 
     currentProductIndex++;
     if (currentProductIndex >= individuals.length) {
+        console.log("All products rated - proceeding to final submission");
         submitFinalRanking();
     } else {
+        console.log(`Moving to next product (${currentProductIndex+1}/${individuals.length})`);
         displayProduct();
     }
 }
 
 // Submit final results to backend
 function submitFinalRanking() {
+    console.log("\n=== PREPARING FINAL SUBMISSION ===");
     sessionData.completed = true;
+    
+    console.log("Final session data:", JSON.stringify(sessionData));
+    console.log(`Scores collected: ${Object.keys(sessionData.scores || {}).length}/${individuals.length}`);
+    
     const completionMsg = document.getElementById('completion-message');
     completionMsg.textContent = 'Submitting your ratings...';
     completionMsg.style.display = 'block';
 
     // Disable interaction
     document.getElementById('button1').disabled = true;
+    console.log("UI updated for submission state");
 
+    console.log("Sending data to server...");
     fetch('https://bonsaiacg.pythonanywhere.com/session_complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sessionData)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log(`Server response status: ${response.status} ${response.statusText}`);
+        if (!response.ok) {
+            throw new Error(`Server responded with status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
-        console.log("Submission success:", data.message);
+        console.log("Submission success:", data);
         completionMsg.textContent = 'Survey Complete, thank you for your participation. Please exit this page.';
 
         // Clear all content except completion message
@@ -307,16 +349,19 @@ function submitFinalRanking() {
         if (customContainer) customContainer.style.display = 'none';
 
         localStorage.removeItem('sessionId');
+        console.log("Session completed successfully");
     })
     .catch(err => {
         console.error("Submission error:", err);
-        completionMsg.textContent = 'Survey submission failed. Please exit this page.';
+        console.log("Error details:", err.message || "Unknown error");
+        completionMsg.textContent = 'Survey submission failed. Please try refreshing the page or contact support.';
     });
 }
 
 // Mark session complete if user exits
 function completeSession() {
     if (sessionId) {
+        console.log("Page unloading - sending final beacon");
         navigator.sendBeacon(
             'https://bonsaiacg.pythonanywhere.com/session_complete',
             JSON.stringify({ session_id: sessionId })
@@ -325,11 +370,19 @@ function completeSession() {
     }
 }
 
+// Add debugging for localStorage on load
+window.addEventListener('load', function() {
+    console.log("=== PAGE LOADED ===");
+    const storedSessionId = localStorage.getItem('sessionId');
+    console.log(`Stored session ID in localStorage: ${storedSessionId || 'none'}`);
+});
+
 // Event listeners
 window.addEventListener('unload', completeSession);
 
 window.onload = function () {
     sessionId = localStorage.getItem('sessionId');
+    console.log(`Initializing with session ID: ${sessionId || 'Starting new session'}`);
     startSession();
 };
 
